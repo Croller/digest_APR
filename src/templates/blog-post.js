@@ -1,57 +1,43 @@
 import React from "react"
 import { Link, graphql } from "gatsby"
-import get from 'lodash.get'
+import { MDXRenderer } from "gatsby-plugin-mdx"
+
 import Bio from "../components/bio"
 import Layout from "../components/layout"
 import SEO from "../components/seo"
 import { rhythm, scale } from "../utils/typography"
-import { remarkForm, DeleteAction } from "gatsby-tinacms-remark"
 
-const BlogPostTemplate = ({ data, pageContext, location }) => {
-  const post = data.markdownRemark
-  const { fields } = post
-  const siteTitle = data.site.siteMetadata.title
-  const { previous, next } = pageContext
-  console.log(data);
-  
-  return (
-    <Layout location={location} title={siteTitle}>
-      <SEO
-        title={post.frontmatter.title}
-        description={post.frontmatter.description || post.excerpt}
-      />
-      <article>
-        <header>
-          <h1
-            style={{
-              marginTop: rhythm(1),
-              marginBottom: 0,
-            }}
-          >
-            {post.frontmatter.title}
-          </h1>
-          <p
-            style={{
-              ...scale(-1 / 5),
-              display: `block`,
-              marginBottom: rhythm(1),
-            }}
-          >
-            {post.frontmatter.date}
-          </p>
-        </header>
-        <section dangerouslySetInnerHTML={{ __html: post.html }} />
+class BlogPostTemplate extends React.Component {
+  render() {
+    const post = this.props.data.mdx
+    const siteTitle = this.props.data.site.siteMetadata.title
+    const { previous, next } = this.props.pageContext
+
+    return (
+      <Layout location={this.props.location} title={siteTitle}>
+        <SEO
+          title={post.frontmatter.title}
+          description={post.frontmatter.description || post.excerpt}
+        />
+        <h1>{post.frontmatter.title}</h1>
+        <p
+          style={{
+            ...scale(-1 / 5),
+            display: `block`,
+            marginBottom: rhythm(1),
+            marginTop: rhythm(-1),
+          }}
+        >
+          {post.frontmatter.date}
+        </p>
+        <MDXRenderer>{post.body}</MDXRenderer>
         <hr
           style={{
             marginBottom: rhythm(1),
           }}
         />
-        <footer>
-          <Bio />
-        </footer>
-      </article>
+        <Bio />
 
-      <nav>
         <ul
           style={{
             display: `flex`,
@@ -63,167 +49,43 @@ const BlogPostTemplate = ({ data, pageContext, location }) => {
         >
           <li>
             {previous && (
-              <Link to={previous.fields.slug} rel="prev">
+              <Link to={`blog${previous.fields.slug}`} rel="prev">
                 ← {previous.frontmatter.title}
               </Link>
             )}
           </li>
           <li>
             {next && (
-              <Link to={next.fields.slug} rel="next">
+              <Link to={`blog${next.fields.slug}`} rel="next">
                 {next.frontmatter.title} →
               </Link>
             )}
           </li>
         </ul>
-      </nav>
-    </Layout>
-  )
+      </Layout>
+    )
+  }
 }
 
-
-/**
- * This object defines the form for editing blog post.
- */
-const BlogPostForm = {
-  actions: [ DeleteAction ],
-  /**
-   * The list of fields tell us what the form looks like.
-   */
-  fields: [
-    /**
-     * This is a field definition. There are many types of
-     * components available, including:
-     *
-     * * text
-     * * textarea
-     * * toggle
-     * * date
-     * * markdown
-     * * color
-     * * group
-     * * group-list
-     * * blocks
-     */
-    // group
-    {
-      label: 'Authors List',
-      name: 'rawJson.authors',
-      component: 'group-list',
-      description: 'Authors List',
-      itemProps: item => ({
-        key: item.id,
-        label: item.name,
-      }),
-      defaultItem: () => ({
-        name: 'New Author',
-        id: Math.random()
-          .toString(36)
-          .substr(2, 9),
-      }),
-      fields: [
-        {
-          label: 'Name',
-          name: 'name',
-          component: 'text',
-        },
-        {
-          label: 'Best Novel',
-          name: 'best-novel',
-          component: 'text',
-        },
-      ],
-    },
-    // image thumbnail
-    {
-      name: 'rawFrontmatter.thumbnail',
-      label: 'Thumbnail',
-      component: 'image',
-
-      previewSrc: (formValues, { input }) => {
-        const path = input.name.replace('rawFrontmatter', 'frontmatter')
-        const gatsbyImageNode = get(formValues, path)
-        if (!gatsbyImageNode) return ''
-        //specific to gatsby-image
-        return gatsbyImageNode.childImageSharp.fluid.src
-      },
-
-      uploadDir: () => {
-        return '/content/images/'
-      },
-
-      parse: filename => `../images/${filename}`,
-    },
-    // color
-    {
-      name: 'rawFrontmatter.background_color',
-      component: 'color',
-      label: 'Background Color',
-      description: 'Edit the page background color here',
-      colorFormat: 'hex',
-      colors: ['#EC4815', '#241748', '#B4F4E0', '#E6FAF8'],
-      widget: 'sketch',
-    },
-    {
-      //
-      name: "frontmatter.title",
-      component: "text",
-      label: "Title",
-      required: true,
-    },
-    { name: "frontmatter.date", component: "date", label: "Date" },
-    {
-      name: "frontmatter.description",
-      component: "textarea",
-      label: "Short info",
-    },
-    { name: "rawMarkdownBody", component: "markdown", label: "Body" },
-  ],
-}
-
-/**
- * The `remarkForm` higher order component wraps the `BlogPostTemplate`
- * and generates a new form from the data in the `markdownRemark` query.
- */
-export default remarkForm(BlogPostTemplate, BlogPostForm)
+export default BlogPostTemplate
 
 export const pageQuery = graphql`
   query BlogPostBySlug($slug: String!) {
     site {
       siteMetadata {
         title
+        author
       }
     }
-    markdownRemark(fields: { slug: { eq: $slug } }) {
+    mdx(fields: { slug: { eq: $slug } }) {
       id
       excerpt(pruneLength: 160)
-      fields {
-        slug
-      }
-      html
+      body
       frontmatter {
         title
-        date(formatString: "DD.MM.YYYY")
+        date(formatString: "MMMM DD, YYYY")
         description
-      }
-      ...TinaRemark
-    }
-    allImageSharp {
-      edges {
-        node {
-          fixed {
-            base64
-          }
-          parent {
-            ... on File {
-              id
-              name
-              relativePath
-            }
-          }
-        }
       }
     }
   }
 `
-
