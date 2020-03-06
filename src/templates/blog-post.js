@@ -7,15 +7,15 @@ import SEO from "../components/seo"
 import { rhythm, scale } from "../utils/typography"
 
 const BlogPostTemplate = ({ data, pageContext, location }) => {
-  const post = data.markdownRemark
-  const siteTitle = data.site.siteMetadata.title
+  const post = data.htmlContent
+  // const siteTitle = data.site.siteMetadata.title
   const { previous, next } = pageContext
 
   return (
-    <Layout location={location} title={siteTitle}>
+    <Layout location={location} title=''>
       <SEO
-        title={post.frontmatter.title}
-        description={post.frontmatter.description || post.excerpt}
+        title={post.name}
+        description=''
       />
       <article>
         <header>
@@ -25,9 +25,9 @@ const BlogPostTemplate = ({ data, pageContext, location }) => {
               marginBottom: 0,
             }}
           >
-            {post.frontmatter.title}
+            {post.name}
           </h1>
-          <p
+          {/* <p
             style={{
               ...scale(-1 / 5),
               display: `block`,
@@ -35,9 +35,9 @@ const BlogPostTemplate = ({ data, pageContext, location }) => {
             }}
           >
             {post.frontmatter.date}
-          </p>
+          </p> */}
         </header>
-        <section dangerouslySetInnerHTML={{ __html: post.html }} />
+       <div dangerouslySetInnerHTML={{ __html: post.content }} />
         <hr
           style={{
             marginBottom: rhythm(1),
@@ -61,14 +61,14 @@ const BlogPostTemplate = ({ data, pageContext, location }) => {
           <li>
             {previous && (
               <Link to={previous.fields.slug} rel="prev">
-                ← {previous.frontmatter.title}
+                ← {previous.name}
               </Link>
             )}
           </li>
           <li>
             {next && (
               <Link to={next.fields.slug} rel="next">
-                {next.frontmatter.title} →
+                {next.name} →
               </Link>
             )}
           </li>
@@ -81,21 +81,11 @@ const BlogPostTemplate = ({ data, pageContext, location }) => {
 export default BlogPostTemplate
 
 export const pageQuery = graphql`
-  query BlogPostBySlug($slug: String!) {
-    site {
-      siteMetadata {
-        title
-      }
-    }
-    markdownRemark(fields: { slug: { eq: $slug } }) {
+  query HTMLPage($name: String!) {
+    htmlContent(name: { eq: $name }) {
       id
-      excerpt(pruneLength: 160)
-      html
-      frontmatter {
-        title
-        date(formatString: "MMMM DD, YYYY")
-        description
-      }
+      name
+      content
     }
   }
 `
