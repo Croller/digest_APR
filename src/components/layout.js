@@ -1,6 +1,7 @@
 import React from "react"
 import { Link } from "gatsby"
-
+import { withPlugin } from 'tinacms'
+import { RemarkCreatorPlugin } from 'gatsby-tinacms-remark'
 import { rhythm, scale } from "../utils/typography"
 
 const Layout = ({ location, title, children }) => {
@@ -69,4 +70,32 @@ const Layout = ({ location, title, children }) => {
   )
 }
 
-export default Layout
+const CreateBlogPlugin = new RemarkCreatorPlugin( {
+  label: 'Add New Blog',
+  filename: form => {
+    const slug = form.title.replace(/\s+/g, '-').toLowerCase()
+    return `content/blog/${slug}/index.md`
+  },
+  fields: [
+    {
+      label: 'Title',
+      name: 'title',
+      component: 'text',
+      required: true
+    },
+    {
+     name: 'date',
+     component: 'date',
+     label: 'Date',
+     description: 'The default will be today'
+   },
+   {
+     name: 'author',
+     component: 'text',
+     label: 'Author',
+     description: 'Who wrote this?',
+   }
+  ],
+})
+
+export default withPlugin(Layout, CreateBlogPlugin)
