@@ -5,6 +5,8 @@ description: |-
   rgrgr
   rgrrg
 date: '2020-03-12T00:00:00.000Z'
+author:
+  email: frfrfrfrrf
 ---
 Далее, используя уже созданные типы данных, добавляем контент, для текстов можно использовать [SaganIpsum](http://saganipsum.com/) для картинок [Unsplash](https://unsplash.com/search/photos/space)
 
