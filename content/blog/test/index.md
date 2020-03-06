@@ -1,10 +1,10 @@
 ---
 title: simple test
-thumbnail: ../images/tractor-solid.png
+thumbnail: ../images/snowplow-solid.png
 description: |-
   rgrgr
   rgrrg
-date: 2020-03-12T00:00:00.000Z
+date: '2020-03-12T00:00:00.000Z'
 ---
 Далее, используя уже созданные типы данных, добавляем контент, для текстов можно использовать [SaganIpsum](http://saganipsum.com/) для картинок [Unsplash](https://unsplash.com/search/photos/space)
 
