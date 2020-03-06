@@ -9,9 +9,11 @@ import { remarkForm, DeleteAction } from "gatsby-tinacms-remark"
 
 const BlogPostTemplate = ({ data, pageContext, location }) => {
   const post = data.markdownRemark
+  const { fields } = post
   const siteTitle = data.site.siteMetadata.title
   const { previous, next } = pageContext
-
+  console.log(data);
+  
   return (
     <Layout location={location} title={siteTitle}>
       <SEO
@@ -173,7 +175,7 @@ const BlogPostForm = {
     {
       name: "frontmatter.description",
       component: "textarea",
-      label: "Textarea",
+      label: "Short info",
     },
     { name: "rawMarkdownBody", component: "markdown", label: "Body" },
   ],
@@ -195,13 +197,33 @@ export const pageQuery = graphql`
     markdownRemark(fields: { slug: { eq: $slug } }) {
       id
       excerpt(pruneLength: 160)
+      fields {
+        slug
+      }
       html
-      ...TinaRemark
       frontmatter {
         title
-        date(formatString: "MMMM DD, YYYY")
+        date(formatString: "DD.MM.YYYY")
         description
+      }
+      ...TinaRemark
+    }
+    allImageSharp {
+      edges {
+        node {
+          fixed {
+            base64
+          }
+          parent {
+            ... on File {
+              id
+              name
+              relativePath
+            }
+          }
+        }
       }
     }
   }
 `
+
